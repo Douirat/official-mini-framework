@@ -11,7 +11,7 @@ The code keeps growing and maintaining it becomes harder. even the code that you
 
 FacileJS is a lightweight basic JavaScript framework, it's a small basic copy of ReactJS that handles states, rounting, rendering and rerendering components using diffing algorithm and other concepts that you will see later in the documentation.
 
-####Example of creating nested elements:
+###Example of creating nested elements:
 ```
 return FacileJS.createElement('header', { class: 'header' },
     FacileJS.createElement('h1', {}, 'todos'),
