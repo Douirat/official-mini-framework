@@ -23,3 +23,15 @@ return FacileJS.createElement('header', { class: 'header' },
     })
   );
 ```
+
+in the example above we created an element that has a class with the value header and three children each child has it's own attributes in vanilla js that would have take a lot more time, lines and methodes and that would have been a mess, now all that is possible to be done in less than ten lines
+
+
+## State Management
+
+
+## Routing
+
+
+## Rendering
+
