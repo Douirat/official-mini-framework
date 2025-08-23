@@ -118,8 +118,11 @@ function TodoItemComponent({ todo, isEditing }) {
       value: todo.title,
       onkeydown: handleFinishEditing,
       onblur: () => store.dispatch({ type: 'CANCEL_EDITING' }),
-      ref: (input) => input && input.focus(),
-    })
+ref: (input) => {
+        if (input) {
+          setTimeout(() => input.focus(), 0);
+        }
+      },    })
   );
 }
 
