@@ -107,7 +107,7 @@ function TodoItemComponent({ todo, isEditing }) {
 
   const liClass = `${todo.completed ? 'completed' : ''} ${isEditing ? 'editing' : ''}`;
 
-  return FacileJS.createElement('li', { class: liClass, 'data-id': todo.id },
+  return FacileJS.createElement('li', { class: liClass, 'data-id': todo.id, key: todo.id },
     FacileJS.createElement('div', { class: 'view' },
       FacileJS.createElement('input', { class: 'toggle', type: 'checkbox', checked: todo.completed, onchange: handleToggle }),
       FacileJS.createElement('label', { ondblclick: handleStartEditing }, todo.title),
