@@ -121,22 +121,68 @@ function patch(parentEl, oldVNode, newVNode, index = 0) {
 }
 
 function patchChildren(parentEl, oldChildren, newChildren) {
-    const oldLen = oldChildren.length;
-    const newLen = newChildren.length;
-    const commonLen = Math.min(oldLen, newLen);
+    const oldCh = oldChildren.flat();
+    const newCh = newChildren.flat();
 
-    for (let i = 0; i < commonLen; i++) {
-        patch(parentEl, oldChildren[i], newChildren[i], i);
-    }
+    const isKeyed = (child) => child?.props?.key !== undefined;
 
-    if (oldLen > newLen) {
-        for (let i = oldLen - 1; i >= newLen; i--) {
-            parentEl.childNodes[i].remove();
+    if (newCh.every(isKeyed) && oldCh.every(isKeyed)) {
+        const oldKeyMap = new Map();
+        const newKeyMap = new Map();
+        const childNodes = parentEl.childNodes;
+
+        oldCh.forEach((child, i) => {
+            oldKeyMap.set(child.props.key, { vnode: child, el: childNodes[i], index: i });
+        });
+
+        newCh.forEach((child, i) => {
+            newKeyMap.set(child.props.key, { vnode: child, index: i });
+        });
+
+        oldKeyMap.forEach((oldData, key) => {
+            if (!newKeyMap.has(key)) {
+                parentEl.removeChild(oldData.el);
+            }
+        });
+
+        let lastPlacedNode = null;
+        for (let i = 0; i < newCh.length; i++) {
+            const newVNode = newCh[i];
+            const key = newVNode.props.key;
+            const existingOld = oldKeyMap.get(key);
+            const currentEl = parentEl.childNodes[i] || null;
+
+            if (existingOld) {
+                const elToMove = existingOld.el;
+                patch(parentEl, existingOld.vnode, newVNode, Array.from(parentEl.childNodes).indexOf(elToMove));
+                if (elToMove !== currentEl) {
+                    parentEl.insertBefore(elToMove, currentEl);
+                }
+            } else {
+                const newEl = render(newVNode);
+                parentEl.insertBefore(newEl, currentEl);
+            }
         }
-    }
-    else if (newLen > oldLen) {
-        for (let i = oldLen; i < newLen; i++) {
-            parentEl.appendChild(render(newChildren[i]));
+    } else {
+        // Fallback for unkeyed children
+        const oldLen = oldCh.length;
+        const newLen = newCh.length;
+        const commonLen = Math.min(oldLen, newLen);
+
+        for (let i = 0; i < commonLen; i++) {
+            patch(parentEl, oldCh[i], newCh[i], i);
+        }
+
+        if (oldLen > newLen) {
+            for (let i = oldLen - 1; i >= newLen; i--) {
+                if (parentEl.childNodes[i]) {
+                    parentEl.childNodes[i].remove();
+                }
+            }
+        } else if (newLen > oldLen) {
+            for (let i = oldLen; i < newLen; i++) {
+                parentEl.appendChild(render(newCh[i]));
+            }
         }
     }
 }
