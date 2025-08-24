@@ -1,16 +1,10 @@
 
 export const createRouter = (store) => {
  
-  const getRoute = () => {
-    const hash = window.location.hash;
-    switch (hash) {
-      case '#/active':
-        return 'active';
-      case '#/completed':
-        return 'completed';
-      default:
-        return 'all';
-    }
+ const getRoute = () => {
+   const hash = window.location.hash; 
+  const route = hash.replace(/^#\//, ''); 
+  return route || 'all'; 
   };
 
   
