@@ -180,7 +180,7 @@ function App() {
     ),
     FacileJS.createElement('footer', { class: 'info' },
       FacileJS.createElement('p', {}, 'Double-click to edit a todo'),
-      FacileJS.createElement('p', {}, 'Created by Jules'),
+      FacileJS.createElement('p', {}, 'Created by zone01'),
       FacileJS.createElement('p', {}, 'Part of TodoMVC')
     )
   );
