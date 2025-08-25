@@ -11,41 +11,44 @@ export const createElement = (tag, props, ...children) => {
 
 
 export const render = (vnode) => {
+  // Handle null, undefined, or boolean nodes by returning an empty text node
   if (vnode === null || vnode === undefined || typeof vnode === 'boolean') {
     return document.createTextNode('');
   }
 
+  // Handle primitive nodes (string or number) by returning a text node
   if (typeof vnode === 'string' || typeof vnode === 'number') {
     return document.createTextNode(vnode.toString());
   }
 
+  // Destructure the virtual node object
   const { tag, props, children } = vnode;
 
+  // Create a real DOM element for the given tag
   const element = document.createElement(tag);
 
+  // Attach event handlers from props
   applyEventHandlers(element, props);
 
+  // Set attributes and properties on the element
   for (const [key, value] of Object.entries(props)) {
-    if (key.startsWith('on')) {
-      continue; 
-    }
+    if (key.startsWith('on')) continue; // Skip event handlers
 
-    if (key === 'ref') {
-      if (typeof value === 'function') {
-        value(element);
-      }
+    if (key === 'ref' && typeof value === 'function') {
+      value(element); // Call ref function with the element
     } else if (key === 'checked' || key === 'value' || key === 'disabled' || key === 'autofocus') {
-      element[key] = value;
+      element[key] = value; // Set as property
     } else {
-      element.setAttribute(key, value);
+      element.setAttribute(key, value); // Set as attribute
     }
   }
 
+  // Recursively render and append children
   for (const child of children) {
     element.appendChild(render(child));
   }
 
-  return element;
+  return element; // Return the real DOM element
 };
 
 
@@ -91,19 +94,24 @@ function patchProps(el, oldProps, newProps) {
 }
 
 function patch(parentEl, oldVNode, newVNode, index = 0) {
+    // Get the DOM node at the specified index
     const el = parentEl.childNodes[index];
 
+    // If there is no existing DOM node, render and append the new node
     if (!el) {
         parentEl.appendChild(render(newVNode));
         return;
     }
 
+    // Normalize old and new virtual nodes (handle null/boolean)
     const oldV = (oldVNode == null || typeof oldVNode === 'boolean') ? '' : oldVNode;
     const newV = (newVNode == null || typeof newVNode === 'boolean') ? '' : newVNode;
 
+    // Check if either node is a primitive (string, number)
     const oldIsPrimitive = typeof oldV !== 'object';
     const newIsPrimitive = typeof newV !== 'object';
 
+    // If either is primitive, compare their string values and replace if different
     if (oldIsPrimitive || newIsPrimitive) {
         if (String(oldV) !== String(newV)) {
             el.replaceWith(render(newV));
@@ -111,13 +119,15 @@ function patch(parentEl, oldVNode, newVNode, index = 0) {
         return;
     }
 
+    // If the tag (element type) has changed, replace the DOM node
     if (oldV.tag !== newV.tag) {
         el.replaceWith(render(newV));
         return;
     }
 
-    patchProps(el, oldV.props, newV.props);
-    patchChildren(el, oldV.children, newV.children);
+    // If tags match, update props and children
+    patchProps(el, oldV.props, newV.props);      // Update attributes, event handlers, refs
+    patchChildren(el, oldV.children, newV.children); // Recursively patch child nodes
 }
 
 function patchChildren(parentEl, oldChildren, newChildren) {
