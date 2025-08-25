@@ -60,33 +60,50 @@ export const mount = (node, target) => {
 
 
 function patchProps(el, oldProps, newProps) {
+  // If props are identical, do nothing
   if (oldProps === newProps) return;
+
+  // Ensure props are objects (avoid null/undefined)
   oldProps = oldProps || {};
   newProps = newProps || {};
 
+  // Loop through newProps to add/update them
   for (const key in newProps) {
     if (newProps.hasOwnProperty(key)) {
       const oldValue = oldProps[key];
       const newValue = newProps[key];
+
+      // Only update if the value has changed
       if (newValue !== oldValue) {
+        // If it's an event handler (onClick, etc.), set it directly
         if (key.startsWith('on') && typeof newValue === 'function') {
           el[key.toLowerCase()] = newValue;
-        } else if (key === 'ref' && typeof newValue === 'function') {
+        }
+        // If it's a ref and a function, call it with the element
+        else if (key === 'ref' && typeof newValue === 'function') {
           newValue(el);
-        } else if (key === 'checked' || key === 'value' || key === 'disabled' || key === 'autofocus') {
+        }
+        // For certain properties, set them directly on the element
+        else if (key === 'checked' || key === 'value' || key === 'disabled' || key === 'autofocus') {
           el[key] = newValue;
-        } else if (newValue != null) {
+        }
+        // Otherwise, set as a regular attribute
+        else if (newValue != null) {
           el.setAttribute(key, newValue);
         }
       }
     }
   }
 
+  // Loop through oldProps to remove any that are not in newProps
   for (const key in oldProps) {
     if (oldProps.hasOwnProperty(key) && !newProps.hasOwnProperty(key)) {
+      // Remove event handlers
       if (key.startsWith('on')) {
         el[key.toLowerCase()] = null;
-      } else if (key !== 'ref') {
+      }
+      // Remove attributes (but not ref)
+      else if (key !== 'ref') {
         el.removeAttribute(key);
       }
     }
